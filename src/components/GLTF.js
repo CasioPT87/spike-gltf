@@ -42,8 +42,9 @@ export default class GLTF extends React.Component {
 
     new RGBELoader()
       .setDataType( THREE.UnsignedByteType )
-      .setPath( 'textures/equirectangular/' )
-      .load( 'dresden_station_night_1k.hdr', function ( texture ) {
+      // .setPath( 'textures/equirectangular/' )
+      // .load( 'dresden_station_night_1k.hdr', function ( texture ) {
+      .load(process.env.PUBLIC_URL + '/aerodynamics_workshop_1k.hdr', (texture) => {
         var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
         scene.background = new THREE.Color( 0xf7f7f7 );
@@ -52,27 +53,29 @@ export default class GLTF extends React.Component {
         texture.dispose();
         pmremGenerator.dispose();
 
-        this.apply(renderer, scene, camera);
+        this.run(renderer, scene, camera);
 
         // model
 
         // use of RoughnessMipmapper is optional
-        var roughnessMipmapper = new RoughnessMipmapper( renderer );
+        var roughnessMipmapper = new RoughnessMipmapper(renderer);
 
-        var loader = new GLTFLoader().setPath( 'models/gltf/barware/winetumbler/' );
-        loader.load( 'EEVEE3js.gltf', function ( gltf ) {
+        console.log(`${process.env.PUBLIC_URL}/winetumbler/`)
 
-          gltf.scene.traverse( function ( child ) {
+        var loader = new GLTFLoader()
+        .setPath(`${process.env.PUBLIC_URL}/winetumbler/`);
+        loader.load( 'EEVEE3js.gltf', (gltf) => {
 
-            if ( child.isMesh ) {
-              roughnessMipmapper.generateMipmaps( child.material );
+          gltf.scene.traverse( function (child) {
+
+            if (child.isMesh) {
+              roughnessMipmapper.generateMipmaps(child.material );
             }
-
           });
 
           scene.add( gltf.scene );
           roughnessMipmapper.dispose();
-          this.apply(renderer, scene, camera);
+          this.run(renderer, scene, camera);
 
         });
       });
@@ -89,7 +92,7 @@ export default class GLTF extends React.Component {
       pmremGenerator.compileEquirectangularShader();
 
       controls = new OrbitControls( camera, renderer.domElement );
-      // controls.addEventListener( 'change', render ); // use if there is no animation loop
+      controls.addEventListener( 'change', () => { this.run(renderer, scene, camera) } ); // use if there is no animation loop
       controls.minDistance = 2;
       controls.maxDistance = 5
       controls.target.set( 0, 0, 0 );
@@ -99,7 +102,7 @@ export default class GLTF extends React.Component {
 
   }
 
-  apply(renderer, scene, camera) {
+  run(renderer, scene, camera) {
     renderer.render( scene, camera );
   }
   
