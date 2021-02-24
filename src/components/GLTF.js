@@ -4,9 +4,15 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper';
+
+const PATHS = ['petbed', 'winetumbler'];
 export default class GLTF extends React.Component {
 
   view = null;
+
+  state = {
+    path: PATHS[1]  
+  }
 
   // componentDidMount() {
   //   var scene = new THREE.Scene();
@@ -30,7 +36,10 @@ export default class GLTF extends React.Component {
   // }
 
   componentDidMount() {
+    this.setStart();
+  }
 
+  setStart = () => {
     var container, controls;
 		var camera, scene, renderer;
 
@@ -60,11 +69,11 @@ export default class GLTF extends React.Component {
         // use of RoughnessMipmapper is optional
         var roughnessMipmapper = new RoughnessMipmapper(renderer);
 
-        console.log(`${process.env.PUBLIC_URL}/winetumbler/`)
-
         var loader = new GLTFLoader()
-        .setPath(`${process.env.PUBLIC_URL}/winetumbler/`);
+          .setPath(`${process.env.PUBLIC_URL}/${this.state.path}/`);
         loader.load( 'EEVEE3js.gltf', (gltf) => {
+
+          console.log(gltf)
 
           gltf.scene.traverse( function (child) {
 
@@ -99,7 +108,6 @@ export default class GLTF extends React.Component {
       controls.update();
 
       // window.addEventListener( 'resize', onWindowResize, false );
-
   }
 
   run(renderer, scene, camera) {
@@ -108,7 +116,9 @@ export default class GLTF extends React.Component {
   
   render() {
     return (
-      <div ref={ref => (this.view = ref)} />
+      <div>
+        <div ref={ref => (this.view = ref)} />
+      </div>  
     )
   }
   
