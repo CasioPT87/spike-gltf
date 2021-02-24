@@ -2,10 +2,10 @@
 
 Yoopeedooh
 
-1 - Clone repository, cd to repository
-2 - use Node v14
-3 - npm i
-4 - npm start
+- Clone repository, cd to repository
+- use Node v14
+- npm i
+- npm start
 
 Should open a new tab with the project
 
