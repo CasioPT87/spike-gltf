@@ -36,7 +36,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Subject.000",
+            "name" : "PrintableArea",
             "scale" : [
                 0.09700000286102295,
                 1,
@@ -184,7 +184,7 @@
                 0,
                 0
             ],
-            "name" : "Metalbottle_printable",
+            "name" : "printableArea",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 0,
