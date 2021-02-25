@@ -4,6 +4,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
+const REQUEST_PARAMS = {
+  mode: 'no-cors',
+  headers: {
+    'Content-Type': '*',
+  }
+}
+
 const PHOTOS = ['sevilla.jpg', 'cyclist.jpg'];
 export default class GLTF extends React.Component {
 
@@ -15,6 +22,25 @@ export default class GLTF extends React.Component {
 
   componentDidMount() {
     this.setStart();
+  }
+
+  getUrl = async () => {
+    const domain = 'https://preview-3d-pr1b-feature-mxdxpwg46a-ew.a.run.app';
+    const mediaPath = 'api/v1/media/1?format=json';
+    return fetch(`${domain}/${mediaPath}`, {...REQUEST_PARAMS})
+      .then(res => res.json())
+      .then(json => {
+        console.log(json)
+        return `${domain}${json.url}`
+      })
+  }
+
+  getFile = () => {
+    const url = this.getUrl();
+
+    const file = fetch(url, {...REQUEST_PARAMS})
+      .then(response => console.log(response))
+    // .then(data => console.log(data));
   }
 
   setStart = (elementToRemove = false) => {
@@ -96,6 +122,7 @@ export default class GLTF extends React.Component {
       <div>
         <div ref={ref => (this.view = ref)} />
         <button style={{ position: 'fixed', top: '10px', padding: '0px' }} onClick={this.changeImage} >change image</button>
+        <button style={{ position: 'fixed', top: '10px', left: '0px', padding: '0px' }} onClick={this.getFile} >get file</button>
       </div>  
     )
   }
