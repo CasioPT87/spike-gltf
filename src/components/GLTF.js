@@ -4,14 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
-const REQUEST_PARAMS = {
-  mode: 'no-cors',
-  headers: {
-    'Content-Type': '*',
-  }
-}
-
-const PHOTOS = ['sevilla.jpg', 'cyclist.jpg'];
+const PHOTOS = ['sevilla.jpg', 'cyclist.jpg', 'livelink.png'];
 export default class GLTF extends React.Component {
 
   view = null;
@@ -25,27 +18,37 @@ export default class GLTF extends React.Component {
   }
 
   getUrl = async () => {
-    const domain = 'https://preview-3d-pr1b-feature-mxdxpwg46a-ew.a.run.app';
-    const mediaPath = 'api/v1/media/1?format=json';
-    return fetch(`${domain}/${mediaPath}`, {...REQUEST_PARAMS})
-      .then(res => res.json())
-      .then(json => {
-        console.log(json)
-        return `${domain}${json.url}`
-      })
+    const domain = 'https://preview-3d-pr2b-feature-mxdxpwg46a-ew.a.run.app'
+    const mediaPath = 'api/v1/media/4';
+    const res = await fetch(`${domain}/${mediaPath}`)
+    if (res.ok) {
+      const data = await res.json();
+      return `${domain}${data.url}`
+    }
   }
 
-  getFile = () => {
-    const url = this.getUrl();
-
-    const file = fetch(url, {...REQUEST_PARAMS})
-      .then(response => console.log(response))
-    // .then(data => console.log(data));
+  getFile = async () => {
+    const url = await this.getUrl();
+    const res = await fetch(url);
+    if (res.ok) {
+      console.log('response is ok')
+      const gltf = await res.arrayBuffer();
+      console.log(gltf)
+      return gltf;
+    }
   }
 
-  setStart = (elementToRemove = false) => {
+  // getFile = async () => {
+  //   const response = await fetch('http://localhost:4000/EEVEE3js.glb')
+  //   const file = await response.arrayBuffer();
+  //   return file;
+  // }
+
+  setStart = async (elementToRemove = false) => {
     var container, controls;
 		var camera, scene, renderer;
+
+    const file = await this.getFile();
 
     container = this.view;
 		camera = new THREE.PerspectiveCamera( 5, window.innerWidth / window.innerHeight, 0.25, 20 );
@@ -64,10 +67,15 @@ export default class GLTF extends React.Component {
 
           replacementImage.flipY = false;
 
-          var loader = new GLTFLoader().setPath(`${process.env.PUBLIC_URL}/winetumbler/`);
-          loader.load( 'EEVEE3js.gltf', (gltf) => {
+          var loader = new GLTFLoader()
+          loader.parse(file, '', (gltf) => {
 
-            const mesh = gltf.scene.children.find(mesh => mesh.name === "PrintableArea");
+            console.log('loaded file')
+            console.log(gltf)
+
+            const mesh = gltf.scenes[0].children.find(mesh => mesh.name === "PrintableArea");
+
+            // const mesh = gltf.scenes[0].children[0];
 
             replacementImage.needsUpdate = true;
 
@@ -94,11 +102,10 @@ export default class GLTF extends React.Component {
       container.appendChild( renderer.domElement );
 
       var pmremGenerator = new THREE.PMREMGenerator( renderer );
-      pmremGenerator.compileEquirectangularShader();
+      // pmremGenerator.compileEquirectangularShader();
 
       controls = new OrbitControls( camera, renderer.domElement );
-      controls.addEventListener( 'change', () => { this.run(renderer, scene, camera) } ); // use if there is no animation loop
-      controls.minDistance = 2;
+      controls.addEventListener( 'change', () => { this.run(renderer, scene, camera) } );
       controls.maxDistance = 5
       controls.target.set( 0, 0, 0 );
       controls.update();
@@ -122,7 +129,6 @@ export default class GLTF extends React.Component {
       <div>
         <div ref={ref => (this.view = ref)} />
         <button style={{ position: 'fixed', top: '10px', padding: '0px' }} onClick={this.changeImage} >change image</button>
-        <button style={{ position: 'fixed', top: '10px', left: '0px', padding: '0px' }} onClick={this.getFile} >get file</button>
       </div>  
     )
   }
